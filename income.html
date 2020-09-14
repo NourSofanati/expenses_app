@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="msapplication-starturl" content="/">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
 
@@ -27,7 +30,7 @@
                 <div class="card green darken-3">
                     <div class="card-content white-text">
                         <span class="card-title">Your balance:</span>
-                        <p>$0</p>
+                        <p id="balance">$0</p>
                     </div>
                 </div>
             </div>
@@ -35,14 +38,14 @@
                 <div class="card green darken-3">
                     <div class="card-content white-text">
                         <span class="card-title">Your savings:</span>
-                        <p>$0</p>
+                        <p id="savings">$0</p>
                     </div>
                 </div>
             </div>
 
         </div>
-        <ul class="collection">
-
+        <ul class="collection" id="coll">
+            <!-- 
             <li class="collection-item avatar">
                 <i class="material-icons circle green">move_to_inbox</i>
                 <span class="title">Title</span>
@@ -72,7 +75,7 @@
                 <span class="title">Title</span>
                 <p>First Line</p>
                 <a href="#!" class="secondary-content"><i class="material-icons">mode_edit</i></a>
-            </li>
+            </li> -->
 
         </ul>
     </div>
@@ -82,13 +85,32 @@
     </a>
     <!-- Modal Structure -->
     <div id="modal1" class="modal">
-        <div class="modal-content">
-            <h4>Modal Header</h4>
-            <p>A bunch of text</p>
-        </div>
-        <div class="modal-footer">
-            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Agree</a>
-        </div>
+        <form>
+            <div class="modal-content">
+                <h4>Add income item</h4>
+                <hr>
+                <br><br>
+                <div class="input-field">
+                    <input required type="date" name="date" id="date">
+                    <label for="date">Date:</label>
+                </div>
+                <div class="input-field">
+                    <input required type="number" name="value" id="value">
+                    <label for="value">Value:</label>
+                </div>
+                <div class="input-field">
+                    <select required name="type" id="type" id="type">
+                        <option value="balance">Balance</option>
+                        <option value="savings">Savings</option>
+                    </select>
+                    <label for="type">Add to:</label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <!-- <a href="#!" class="modal-close waves-effect waves-green btn-flat" id="agreeBtn">Agree</a> -->
+                <input type="submit" value="Submit" class="waves-effect waves-green btn-flat btn" id="agreeBtn">
+            </div>
+        </form>
     </div>
     <script src="./app.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
@@ -96,16 +118,45 @@
         crossorigin="anonymous"></script>
     <script>
 
-        document.addEventListener('DOMContentLoaded', function () {
-            var elems = document.querySelectorAll('.modal');
-            var instances = M.Modal.init(elems, {});
-        });
-
-        // Or with jQuery
-
         $(document).ready(function () {
+            let incomeItems = localStorage.getItem('incomeItems') ? JSON.parse(localStorage.getItem('incomeItems')) : [];
+            getItems();
             $('.modal').modal();
+            $('select').formSelect();
+            $("#agreeBtn").click((e) => {
+
+                e.preventDefault();
+                let incomeItem = {
+                    'date': $('#date').val(),
+                    'type': $('#type').val(),
+                    'value': $('#value').val(),
+                }
+                incomeItems.push(incomeItem);
+                localStorage.setItem('incomeItems', JSON.stringify(incomeItems));
+                console.log(incomeItems);
+                getItems();
+            });
         });
+        function getItems() {
+            $('#coll').text("");
+            let totalBalance = 0;
+            let totalSavings = 0;
+            let items = JSON.parse(localStorage.getItem('incomeItems'));
+            items.forEach(element => {
+                element.type == 'balance' ? totalBalance += parseFloat(element.value) : totalSavings += parseFloat(element.value);
+                let item = `
+                <li class="collection-item avatar">
+                    <i class="material-icons circle green">move_to_inbox</i>
+                    <span class="title">${element.type} - $${element.value}</span>
+                    <p>${element.date}</p>
+                    <a href="#!" class="secondary-content"><i class="material-icons">mode_edit</i></a>
+                </li>
+                `;
+                $('#coll').append(item);
+            });
+            $('#balance').text(`$${totalBalance}`);
+            $('#savings').text(`$${totalSavings}`);
+        }
     </script>
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>

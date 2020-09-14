@@ -1,0 +1,9 @@
+{
+  "name": "Expenses App",
+  "short_name": "Expenses App",
+  "theme_color": "#311b92",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/index.html"
+}
